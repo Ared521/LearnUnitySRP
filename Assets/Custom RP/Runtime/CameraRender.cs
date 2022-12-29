@@ -15,6 +15,9 @@ public partial class CameraRenderer
 	CullingResults cullingResults;
 
 	static ShaderTagId unlitShaderTagId = new ShaderTagId("SRPDefaultUnlit");
+	static ShaderTagId litShaderTagId = new ShaderTagId("CustomLit");
+
+	Lighting lighting = new Lighting();
 
 	public void Render(ScriptableRenderContext context, Camera camera, bool useDynamicBatching, bool useGPUInstancing)
 	{
@@ -30,6 +33,10 @@ public partial class CameraRenderer
 		}
 
 		Setup();
+
+		// Lighting实例, 在绘制可见几何体之前用它来设置lighting。
+		lighting.Setup(context, cullingResults);
+
 		DrawVisibleGeometry(useDynamicBatching, useGPUInstancing);
 		// 该方法在CameraRender.Editor脚本中。CameraRender和CameraRender.Editor是同一个类，分开在两个脚本中写，通过partial关键字。
 		DrawUnsupportedShaders();
@@ -66,6 +73,9 @@ public partial class CameraRenderer
 			enableDynamicBatching = useDynamicBatching,
 			enableInstancing = useGPUInstancing
 		};
+
+		// 要渲染使用这个pass的对象，我们必须把它添加进CameraRenderer中,利用Tags标识符。
+		drawingSettings.SetShaderPassName(1, litShaderTagId);
 		var filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
 		context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
 		

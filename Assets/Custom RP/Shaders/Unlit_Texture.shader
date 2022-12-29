@@ -17,9 +17,11 @@ Shader "Custom RP/Unlit_Texture" {
 		ZWrite [_ZWrite]
 
 		HLSLPROGRAM
+		#pragma target 3.5
 		
 		// GPU Instance
 		#pragma multi_compile_instancing
+		
 		#pragma vertex UnlitPassVertex
 		#pragma fragment UnlitPassFragment
 		#include "UnlitPass.hlsl"

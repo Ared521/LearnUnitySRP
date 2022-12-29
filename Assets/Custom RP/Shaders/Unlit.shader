@@ -17,9 +17,11 @@ Shader "Custom RP/Unlit" {
 		ZWrite [_ZWrite]
 
 		HLSLPROGRAM
-		
+		#pragma target 3.5
+
 		// GPU Instance
 		#pragma multi_compile_instancing
+		
 		#pragma vertex UnlitPassVertex
 		#pragma fragment UnlitPassFragment
 		#include "UnlitPass.hlsl"
@@ -27,4 +29,7 @@ Shader "Custom RP/Unlit" {
 		ENDHLSL
 		}
 	}
+
+	// 这告诉Unity编辑器使用CustomShaderGUI类的实例来绘制使用Lit着色器的材质的检查器。CustomShaderGUI.cs脚本在Custom RP / Editor文件夹。
+	CustomEditor "CustomShaderGUI"
 }
