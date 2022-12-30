@@ -21,6 +21,8 @@ Shader "Custom RP/Unlit" {
 
 		// GPU Instance
 		#pragma multi_compile_instancing
+
+		#pragma shader_feature _PREMULTIPLY_ALPHA
 		
 		#pragma vertex UnlitPassVertex
 		#pragma fragment UnlitPassFragment

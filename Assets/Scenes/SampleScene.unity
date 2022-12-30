@@ -1061,10 +1061,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 190ce133b4e07ea409cd48cc067b126c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseColor: {r: 0.012415428, g: 0.47679144, b: 0.8773585, a: 0}
-  cutoff: 0
-  metallic: 0.098
-  smoothness: 0.85
+  baseColor: {r: 0.012415428, g: 0.47679144, b: 0.8773585, a: 1}
+  cutoff: 0.44
+  metallic: 0.28
+  smoothness: 0.52
 --- !u!114 &1159155439
 MonoBehaviour:
   m_ObjectHideFlags: 0
