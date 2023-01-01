@@ -19,7 +19,7 @@ public partial class CameraRenderer
 
 	Lighting lighting = new Lighting();
 
-	public void Render(ScriptableRenderContext context, Camera camera, bool useDynamicBatching, bool useGPUInstancing)
+	public void Render(ScriptableRenderContext context, Camera camera, bool useDynamicBatching, bool useGPUInstancing, ShadowSettings shadowSettings)
 	{
 		this.context = context;
 		this.camera = camera;
@@ -27,27 +27,33 @@ public partial class CameraRenderer
 		PrepareBuffer();
 		PrepareForSceneWindow();
 
-		if (!Cull()) 
+		if (!Cull(shadowSettings.maxDistance)) 
 		{
 			return;
 		}
 
-		Setup();
-
+		buffer.BeginSample(SampleName);
+		ExecuteBuffer();
+		
 		// Lighting实例, 在绘制可见几何体之前用它来设置lighting。
-		lighting.Setup(context, cullingResults);
+		lighting.Setup(context, cullingResults, shadowSettings);
+		
+		buffer.EndSample(SampleName);
+		Setup();
 
 		DrawVisibleGeometry(useDynamicBatching, useGPUInstancing);
 		// 该方法在CameraRender.Editor脚本中。CameraRender和CameraRender.Editor是同一个类，分开在两个脚本中写，通过partial关键字。
 		DrawUnsupportedShaders();
 		DrawGizmos();
+		lighting.Cleanup();
 		Submit();
 	}
 
-	bool Cull()
+	bool Cull(float maxShadowDistance)
 	{
 		if (camera.TryGetCullingParameters(out ScriptableCullingParameters p))
 		{
+			p.shadowDistance = Mathf.Min(maxShadowDistance, camera.farClipPlane);
 			cullingResults = context.Cull(ref p);
 			return true;
 		}
@@ -77,13 +83,19 @@ public partial class CameraRenderer
 		// 要渲染使用这个pass的对象，我们必须把它添加进CameraRenderer中,利用Tags标识符。
 		drawingSettings.SetShaderPassName(1, litShaderTagId);
 		var filteringSettings = new FilteringSettings(RenderQueueRange.opaque);
+
+
 		context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
 		
 		context.DrawSkybox(camera);
 
+
 		sortingSettings = new SortingSettings(camera) { criteria = SortingCriteria.CommonTransparent };
 		drawingSettings = new DrawingSettings(unlitShaderTagId, sortingSettings);
+		// 这个如果不加的话，渲染队列设置成transparent，物体不会显示，上面opaque同理。
+		drawingSettings.SetShaderPassName(1, litShaderTagId);
 		filteringSettings = new FilteringSettings(RenderQueueRange.transparent);
+
 		context.DrawRenderers(cullingResults, ref drawingSettings, ref filteringSettings);
 	}
 

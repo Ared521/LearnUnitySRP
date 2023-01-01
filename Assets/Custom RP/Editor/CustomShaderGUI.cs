@@ -46,6 +46,23 @@ public class CustomShaderGUI : ShaderGUI
 		}
 	}
 
+	enum ShadowMode
+	{
+		On, Clip, Dither, Off
+	}
+
+	ShadowMode Shadows
+	{
+		set
+		{
+			if (SetProperty("_Shadows", (float)value))
+			{
+				SetKeyword("_SHADOWS_CLIP", value == ShadowMode.Clip);
+				SetKeyword("_SHADOWS_DITHER", value == ShadowMode.Dither);
+			}
+		}
+	}
+
 	bool HasProperty(string name) => FindProperty(name, properties, false) != null;
 
 	bool HasPremultiplyAlpha => HasProperty("_PremulAlpha");
@@ -87,10 +104,10 @@ public class CustomShaderGUI : ShaderGUI
 		}
 	}
 
-	public override void OnGUI(
-	MaterialEditor materialEditor, MaterialProperty[] properties
-)
+	public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
 	{
+		EditorGUI.BeginChangeCheck();
+
 		base.OnGUI(materialEditor, properties);
 		editor = materialEditor;
 		materials = materialEditor.targets;
@@ -104,6 +121,11 @@ public class CustomShaderGUI : ShaderGUI
 			ClipPreset();
 			FadePreset();
 			TransparentPreset();
+		}
+
+		if (EditorGUI.EndChangeCheck())
+		{
+			SetShadowCasterPass();
 		}
 	}
 
@@ -132,7 +154,7 @@ public class CustomShaderGUI : ShaderGUI
 
 	void ClipPreset()
 	{
-		if (PresetButton("Clip(RenderQueue: AlphaTest)"))
+		if (PresetButton("Clip"))
 		{
 			Clipping = true;
 			PremultiplyAlpha = false;
@@ -145,7 +167,7 @@ public class CustomShaderGUI : ShaderGUI
 
 	void FadePreset()
 	{
-		if (PresetButton("Fade(ZWrite: off && 可调整的混合模式和队列)"))
+		if (PresetButton("Fade"))
 		{
 			Clipping = false;
 			PremultiplyAlpha = false;
@@ -166,6 +188,20 @@ public class CustomShaderGUI : ShaderGUI
 			DstBlend = BlendMode.OneMinusSrcAlpha;
 			ZWrite = false;
 			RenderQueue = RenderQueue.Transparent;
+		}
+	}
+
+	void SetShadowCasterPass()
+	{
+		MaterialProperty shadows = FindProperty("_Shadows", properties, false);
+		if (shadows == null || shadows.hasMixedValue)
+		{
+			return;
+		}
+		bool enabled = shadows.floatValue < (float)ShadowMode.Off;
+		foreach (Material m in materials)
+		{
+			m.SetShaderPassEnabled("ShadowCaster", enabled);
 		}
 	}
 }
