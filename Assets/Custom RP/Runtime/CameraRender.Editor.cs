@@ -12,7 +12,7 @@ public partial class CameraRenderer
 	partial void PrepareForSceneWindow();
 	partial void PrepareBuffer();
 
-
+// Editor模式下，与Release模式的不同是: 若材质错误，Editor模式下会显示粉粉，Release模式下不会显示错误的材质(粉粉)。
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
 
 	string SampleName { get; set; }

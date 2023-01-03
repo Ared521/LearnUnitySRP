@@ -127,6 +127,7 @@ public class Shadows
 		int atlasSize = (int)settings.directional.atlasSize;
 		buffer.GetTemporaryRT(dirShadowAtlasId, atlasSize, atlasSize, 32, FilterMode.Bilinear, RenderTextureFormat.Shadowmap);
 		buffer.SetRenderTarget(dirShadowAtlasId, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
+		// 只关心深度缓冲区。
 		buffer.ClearRenderTarget(true, false, Color.clear);
 
 		buffer.BeginSample(bufferName);
